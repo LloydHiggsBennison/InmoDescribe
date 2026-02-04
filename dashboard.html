@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard de InmoDescribe - Genera descripciones de propiedades con IA">
+    <title>Dashboard | InmoDescribe</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🏠</span>
+                <span class="logo-text">Inmo<span class=\"logo-highlight\">Describe</span></span>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="#" class="active" data-page="generator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                    Generador
+                </a>
+                <a href="#" data-page="history">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Historial
+                </a>
+                <a href="pricing.html">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Planes
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <span class="user-name" id="userName">Usuario</span>
+                        <span class="user-plan">Plan Gratis</span>
+                    </div>
+                </div>
+                <button class="btn btn-ghost btn-block" style="margin-top: 1rem;" id="logoutBtn">Cerrar Sesión</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1>Generador de Descripciones</h1>
+                <p>Crea descripciones profesionales para tus propiedades en segundos</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Créditos Disponibles</span>
+                        <div class="stat-card-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="creditsCount">3</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Generaciones Totales</span>
+                        <div class="stat-card-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="totalGenerations">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Este Mes</span>
+                        <div class="stat-card-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" id="monthlyGenerations">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-header">
+                        <span class="stat-card-title">Plan Actual</span>
+                        <div class="stat-card-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card-value" style="font-size: 1.25rem;">Gratis</div>
+                </div>
+            </div>
+
+            <!-- Generator -->
+            <div class="generator-card">
+                <div class="generator-header">
+                    <h2>✨ Nueva Descripción</h2>
+                </div>
+                <div class="generator-body">
+                    <form class="generator-form" id="generatorForm">
+                        <div class="form-group">
+                            <label for="propertyType">Tipo de Propiedad</label>
+                            <select id="propertyType" required>
+                                <option value="departamento">Departamento</option>
+                                <option value="casa">Casa</option>
+                                <option value="oficina">Oficina</option>
+                                <option value="local comercial">Local Comercial</option>
+                                <option value="terreno">Terreno</option>
+                                <option value="bodega">Bodega</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bedrooms">Habitaciones</label>
+                                <input type="number" id="bedrooms" min="0" max="20" value="3" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="bathrooms">Baños</label>
+                                <input type="number" id="bathrooms" min="1" max="10" value="2" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="size">Metros Cuadrados</label>
+                            <input type="number" id="size" min="10" max="10000" value="85" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Ubicación (Comuna/Ciudad)</label>
+                            <input type="text" id="location" placeholder="Ej: Las Condes, Santiago">
+                        </div>
+                        <div class="form-group">
+                            <label for="features">Características (separadas por coma)</label>
+                            <input type="text" id="features" placeholder="Ej: piscina, estacionamiento, bodega, terraza">
+                        </div>
+                        <div class="form-group">
+                            <label for="style">Estilo de Descripción</label>
+                            <select id="style">
+                                <option value="profesional">Profesional</option>
+                                <option value="emocional">Emocional / Persuasivo</option>
+                                <option value="tecnico">Técnico / Detallado</option>
+                                <option value="lujo">Lujo / Premium</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" id="generateBtn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                            <span>Generar Descripción</span>
+                        </button>
+                    </form>
+                    <div class="generator-result">
+                        <div class="generator-result-header">
+                            <span class="credits-badge">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                <span id="creditsDisplay">3 créditos restantes</span>
+                            </span>
+                            <button class="copy-btn" id="copyBtn" style="display: none;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                Copiar
+                            </button>
+                        </div>
+                        <div class="generator-result-content" id="resultContent">
+                            <p class="placeholder-text">Tu descripción generada aparecerá aquí...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section (hidden by default) -->
+            <div id="historySection" style="display: none;">
+                <div class="dashboard-header">
+                    <h1>Historial de Generaciones</h1>
+                    <p>Todas tus descripciones generadas</p>
+                </div>
+                <div class="history-list" id="historyList">
+                    <p class="placeholder-text">No tienes generaciones aún</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal" style="display: none;">
+        <div class="modal-content auth-card">
+            <div class="auth-header">
+                <h1>🔑 Configurar API</h1>
+                <p>Ingresa tu API Key de OpenRouter para comenzar (es gratis)</p>
+            </div>
+            <form id="apiKeyForm" class="auth-form">
+                <div class="form-group">
+                    <label for="apiKey">OpenRouter API Key</label>
+                    <input type="password" id="apiKey" placeholder="sk-or-..." required>
+                </div>
+                <p style="font-size: 0.75rem; color: var(--neutral-500);">
+                    Obtén tu API Key gratis en <a href="https://openrouter.ai/keys" target="_blank" style="color: var(--primary-600);">openrouter.ai/keys</a>
+                </p>
+                <button type="submit" class="btn btn-primary btn-block">Guardar y Continuar</button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1rem; }
+        .modal-content { animation: modalIn 0.3s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .history-item { background: white; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid var(--neutral-100); margin-bottom: 1rem; cursor: pointer; transition: 0.2s; }
+        .history-item:hover { border-color: #C7D2FE; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .history-item-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .history-item-type { font-weight: 600; }
+        .history-item-date { font-size: 0.75rem; color: var(--neutral-400); }
+        .history-item-preview { font-size: 0.875rem; color: var(--neutral-500); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+
+    <script src="js/auth.js"></script>
+    <script src="js/generator.js"></script>
+</body>
+</html>
