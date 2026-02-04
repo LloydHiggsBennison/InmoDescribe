@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planes | InmoDescribe</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 2rem; }
+        
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        .header { text-align: center; color: white; margin-bottom: 3rem; }
+        .header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+        .header p { font-size: 1.125rem; opacity: 0.9; }
+        .back-link { color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; opacity: 0.8; }
+        .back-link:hover { opacity: 1; }
+        
+        .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        
+        .plan-card {
+            background: white; border-radius: 1.5rem; padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex; flex-direction: column;
+            transition: transform 0.3s;
+        }
+        .plan-card:hover { transform: translateY(-8px); }
+        .plan-card.popular {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            color: white; transform: scale(1.05);
+        }
+        .plan-card.popular:hover { transform: scale(1.05) translateY(-8px); }
+        
+        .popular-badge {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #1e1b4b; font-size: 0.75rem; font-weight: 700;
+            padding: 0.5rem 1rem; border-radius: 2rem;
+            text-align: center; margin-bottom: 1rem;
+        }
+        
+        .plan-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .plan-price { font-size: 3rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .plan-price span { font-size: 1rem; font-weight: 400; opacity: 0.7; }
+        .plan-desc { opacity: 0.7; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        
+        .plan-features { flex: 1; list-style: none; margin-bottom: 2rem; }
+        .plan-features li { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .plan-card.popular .plan-features li { border-color: rgba(255,255,255,0.1); }
+        .plan-features li svg { flex-shrink: 0; color: #10b981; }
+        .plan-card.popular .plan-features li svg { color: #6ee7b7; }
+        
+        .btn-plan {
+            width: 100%; padding: 1rem; font-size: 1rem; font-weight: 600;
+            border-radius: 0.75rem; cursor: pointer; border: none;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+        .btn-primary:hover { box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4); }
+        .btn-secondary { background: #f3f4f6; color: #374151; }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-white { background: white; color: #1e1b4b; }
+        .btn-white:hover { background: #f3f4f6; }
+        
+        .guarantee { text-align: center; color: white; margin-top: 3rem; opacity: 0.9; }
+        .guarantee p { font-size: 0.9rem; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 1.5rem; padding: 2.5rem; max-width: 450px; width: 100%; animation: modalIn 0.3s; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-header { text-align: center; margin-bottom: 1.5rem; }
+        .modal-header h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .modal-header p { color: #6b7280; }
+        
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .form-group input { width: 100%; padding: 0.875rem; border: 2px solid #e5e7eb; border-radius: 0.5rem; font-size: 1rem; }
+        .form-group input:focus { outline: none; border-color: #6366f1; }
+        
+        .btn-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
+        
+        .success-icon { width: 60px; height: 60px; background: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+        
+        @media (max-width: 900px) { .plans { grid-template-columns: 1fr; } .plan-card.popular { transform: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="back-link">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+            Volver al Dashboard
+        </a>
+        
+        <div class="header">
+            <h1>🚀 Elige tu Plan</h1>
+            <p>Potencia tu productividad con descripciones ilimitadas</p>
+        </div>
+        
+        <div class="plans">
+            <!-- Gratis -->
+            <div class="plan-card">
+                <div class="plan-name">Gratis</div>
+                <div class="plan-price">$0 <span>/mes</span></div>
+                <div class="plan-desc">Perfecto para probar</div>
+                <ul class="plan-features">
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> 3 descripciones/mes</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Todos los estilos</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Historial básico</li>
+                </ul>
+                <button class="btn-plan btn-secondary" onclick="showToast('Ya tienes el plan Gratis')">Plan Actual</button>
+            </div>
+            
+            <!-- Pro -->
+            <div class="plan-card popular">
+                <div class="popular-badge">⭐ MÁS POPULAR</div>
+                <div class="plan-name">Pro</div>
+                <div class="plan-price">$15.000 <span>/mes</span></div>
+                <div class="plan-desc">Para corredores activos</div>
+                <ul class="plan-features">
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> 100 descripciones/mes</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Estilos Premium</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Historial ilimitado</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Soporte prioritario</li>
+                </ul>
+                <button class="btn-plan btn-white" onclick="openPaymentModal('pro', 15000)">Mejorar a Pro</button>
+            </div>
+            
+            <!-- Empresas -->
+            <div class="plan-card">
+                <div class="plan-name">Empresas</div>
+                <div class="plan-price">$35.000 <span>/mes</span></div>
+                <div class="plan-desc">Para inmobiliarias</div>
+                <ul class="plan-features">
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Descripciones ilimitadas</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Múltiples usuarios</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Bot WhatsApp</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> API access</li>
+                    <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Soporte dedicado</li>
+                </ul>
+                <button class="btn-plan btn-primary" onclick="openPaymentModal('empresas', 35000)">Elegir Empresas</button>
+            </div>
+        </div>
+        
+        <div class="guarantee">
+            <p>🔒 Pago seguro con MercadoPago • Cancela cuando quieras • Garantía de satisfacción</p>
+        </div>
+    </div>
+    
+    <!-- Payment Modal -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content" style="position: relative;">
+            <button class="btn-close" onclick="closeModal()">&times;</button>
+            <div id="paymentForm">
+                <div class="modal-header">
+                    <h2>💳 Confirmar Pago</h2>
+                    <p>Plan <span id="planNameModal">Pro</span> - <span id="planPriceModal">$15.000</span>/mes</p>
+                </div>
+                <div class="form-group">
+                    <label>Email de facturación</label>
+                    <input type="email" id="billingEmail" placeholder="tu@email.com" required>
+                </div>
+                <button class="btn-plan btn-primary" style="width: 100%;" onclick="processPayment()">
+                    Pagar con MercadoPago
+                </button>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.8rem; color: #6b7280;">
+                    Al continuar, aceptas nuestros términos de servicio
+                </p>
+            </div>
+            <div id="paymentSuccess" style="display: none; text-align: center;">
+                <div class="success-icon">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h2 style="margin-bottom: 0.5rem;">¡Pago Exitoso!</h2>
+                <p style="color: #6b7280; margin-bottom: 1.5rem;">Tu plan ha sido activado</p>
+                <button class="btn-plan btn-primary" onclick="location.href='dashboard.html'">Ir al Dashboard</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedPlan = '';
+        let selectedPrice = 0;
+        
+        function openPaymentModal(plan, price) {
+            selectedPlan = plan;
+            selectedPrice = price;
+            document.getElementById('planNameModal').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+            document.getElementById('planPriceModal').textContent = '$' + price.toLocaleString('es-CL');
+            document.getElementById('paymentModal').classList.add('active');
+            document.getElementById('paymentForm').style.display = 'block';
+            document.getElementById('paymentSuccess').style.display = 'none';
+        }
+        
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('active');
+        }
+        
+        async function processPayment() {
+            const email = document.getElementById('billingEmail').value;
+            if (!email) { showToast('Ingresa tu email'); return; }
+            
+            // Simulate payment processing
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+            
+            await new Promise(r => setTimeout(r, 2000));
+            
+            // Update user plan
+            const user = JSON.parse(localStorage.getItem('inmodescribe_user') || '{}');
+            user.plan = selectedPlan;
+            user.credits = selectedPlan === 'empresas' ? 999 : 100;
+            user.billingEmail = email;
+            localStorage.setItem('inmodescribe_user', JSON.stringify(user));
+            
+            // Update in users array
+            const users = JSON.parse(localStorage.getItem('inmodescribe_users') || '[]');
+            const idx = users.findIndex(u => u.email === user.email);
+            if (idx >= 0) { users[idx] = user; localStorage.setItem('inmodescribe_users', JSON.stringify(users)); }
+            
+            // Show success
+            document.getElementById('paymentForm').style.display = 'none';
+            document.getElementById('paymentSuccess').style.display = 'block';
+        }
+        
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;padding:1rem 1.5rem;background:#1e293b;color:white;border-radius:0.75rem;font-size:0.9rem;z-index:10000;';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        // Close modal on backdrop click
+        document.getElementById('paymentModal').addEventListener('click', (e) => {
+            if (e.target.id === 'paymentModal') closeModal();
+        });
+    </script>
+</body>
+</html>
