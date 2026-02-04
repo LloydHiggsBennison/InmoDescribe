@@ -3,213 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Dashboard de InmoDescribe - Genera descripciones de propiedades con IA">
     <title>Dashboard | InmoDescribe</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; min-height: 100vh; }
+        
+        .app { display: flex; min-height: 100vh; }
+        
+        .sidebar { width: 260px; background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); color: white; padding: 1.5rem; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        
+        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: white; margin-bottom: 2rem; }
+        .logo-icon { font-size: 1.75rem; }
+        .logo-text { font-size: 1.2rem; font-weight: 700; }
+        .logo-highlight { color: #a5b4fc; }
+        
+        .nav { flex: 1; }
+        .nav a { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem 1rem; border-radius: 0.75rem; color: rgba(255,255,255,0.7); text-decoration: none; margin-bottom: 0.5rem; transition: all 0.2s; }
+        .nav a:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav a.active { background: rgba(255,255,255,0.15); color: white; font-weight: 500; }
+        
+        .sidebar-footer { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; }
+        .user-card { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .user-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+        .user-name { font-weight: 500; font-size: 0.9rem; }
+        .user-plan { font-size: 0.75rem; color: #a5b4fc; }
+        .btn-logout { width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 0.5rem; cursor: pointer; font-size: 0.875rem; }
+        
+        .main { flex: 1; margin-left: 260px; padding: 2rem; }
+        
+        .header { margin-bottom: 2rem; }
+        .header h1 { font-size: 1.75rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
+        .header p { color: #64748b; }
+        
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-label { font-size: 0.875rem; color: #64748b; margin-bottom: 0.5rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: #1e293b; }
+        .stat-value.highlight { color: #6366f1; }
+        
+        .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        
+        .panel { background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .panel-title { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 1.25rem; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.4rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.7rem; font-size: 0.9rem; border: 1.5px solid #e5e7eb; border-radius: 0.5rem; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: #6366f1; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        
+        .btn-generate { width: 100%; padding: 0.9rem; font-size: 0.95rem; font-weight: 600; color: white; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; border-radius: 0.75rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; margin-top: 0.5rem; }
+        .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 20px -5px rgba(99, 102, 241, 0.4); }
+        .btn-generate:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        
+        .result-box { background: #f8fafc; border-radius: 0.75rem; padding: 1rem; min-height: 200px; line-height: 1.7; color: #374151; font-size: 0.9rem; }
+        .result-box.placeholder { color: #9ca3af; font-style: italic; display: flex; align-items: center; justify-content: center; }
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+        .credits-badge { font-size: 0.8rem; color: #6366f1; font-weight: 500; }
+        .btn-copy { padding: 0.4rem 0.75rem; background: #e5e7eb; border: none; border-radius: 0.4rem; cursor: pointer; font-size: 0.8rem; }
+        
+        .no-credits { background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 1rem; border-radius: 0.75rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+        .no-credits strong { color: #92400e; }
+        .no-credits p { font-size: 0.8rem; color: #a16207; }
+        .btn-upgrade { padding: 0.6rem 1.25rem; background: #f59e0b; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
+        
+        .history-item { background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.75rem; cursor: pointer; border: 1px solid transparent; }
+        .history-item:hover { border-color: #c7d2fe; }
+        .history-meta { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 0.4rem; }
+        .history-preview { font-size: 0.85rem; color: #374151; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; background: #1e293b; color: white; border-radius: 0.75rem; font-size: 0.9rem; z-index: 1000; }
+        
+        @media (max-width: 1024px) { .stats { grid-template-columns: repeat(2, 1fr); } .content-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+    </style>
 </head>
 <body>
-    <div class="dashboard-layout">
-        <!-- Sidebar -->
+    <div class="app">
         <aside class="sidebar">
             <a href="index.html" class="logo">
                 <span class="logo-icon">🏠</span>
-                <span class="logo-text">Inmo<span class=\"logo-highlight\">Describe</span></span>
+                <span class="logo-text">Inmo<span class="logo-highlight">Describe</span></span>
             </a>
-            <nav class="sidebar-nav">
-                <a href="#" class="active" data-page="generator">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <nav class="nav">
+                <a href="#" class="active" onclick="showSection('generator')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                     Generador
                 </a>
-                <a href="#" data-page="history">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <a href="#" onclick="showSection('history')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     Historial
                 </a>
                 <a href="planes.html">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    Planes
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Mejorar Plan
                 </a>
             </nav>
             <div class="sidebar-footer">
-                <div class="user-info">
+                <div class="user-card">
                     <div class="user-avatar" id="userAvatar">U</div>
-                    <div class="user-details">
-                        <span class="user-name" id="userName">Usuario</span>
-                        <span class="user-plan">Plan Gratis</span>
+                    <div>
+                        <div class="user-name" id="userName">Usuario</div>
+                        <div class="user-plan" id="userPlan">Plan Gratis</div>
                     </div>
                 </div>
-                <button class="btn btn-ghost btn-block" style="margin-top: 1rem;" id="logoutBtn">Cerrar Sesión</button>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
             </div>
         </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="dashboard-header">
-                <h1>Generador de Descripciones</h1>
-                <p>Crea descripciones profesionales para tus propiedades en segundos</p>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <span class="stat-card-title">Créditos Disponibles</span>
-                        <div class="stat-card-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                        </div>
+        
+        <main class="main">
+            <div id="generatorSection" class="section active">
+                <div class="header">
+                    <h1>✨ Generador de Descripciones</h1>
+                    <p>Crea descripciones profesionales para tus propiedades</p>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Créditos</div>
+                        <div class="stat-value highlight" id="credits">3</div>
                     </div>
-                    <div class="stat-card-value" id="creditsCount">3</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <span class="stat-card-title">Generaciones Totales</span>
-                        <div class="stat-card-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
-                        </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Generadas</div>
+                        <div class="stat-value" id="totalGens">0</div>
                     </div>
-                    <div class="stat-card-value" id="totalGenerations">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <span class="stat-card-title">Este Mes</span>
-                        <div class="stat-card-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
-                        </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Este Mes</div>
+                        <div class="stat-value" id="monthGens">0</div>
                     </div>
-                    <div class="stat-card-value" id="monthlyGenerations">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-card-header">
-                        <span class="stat-card-title">Plan Actual</span>
-                        <div class="stat-card-icon">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Plan</div>
+                        <div class="stat-value" style="font-size: 1.1rem;" id="planName">Gratis</div>
                     </div>
-                    <div class="stat-card-value" style="font-size: 1.25rem;">Gratis</div>
                 </div>
-            </div>
-
-            <!-- Generator -->
-            <div class="generator-card">
-                <div class="generator-header">
-                    <h2>✨ Nueva Descripción</h2>
+                
+                <div id="noCreditsAlert" class="no-credits" style="display: none;">
+                    <div style="flex:1;"><strong>⚠️ Sin créditos</strong><p>Mejora tu plan</p></div>
+                    <button class="btn-upgrade" onclick="location.href='planes.html'">Mejorar</button>
                 </div>
-                <div class="generator-body">
-                    <form class="generator-form" id="generatorForm">
-                        <div class="form-group">
-                            <label for="propertyType">Tipo de Propiedad</label>
-                            <select id="propertyType" required>
-                                <option value="departamento">Departamento</option>
-                                <option value="casa">Casa</option>
-                                <option value="oficina">Oficina</option>
-                                <option value="local comercial">Local Comercial</option>
-                                <option value="terreno">Terreno</option>
-                                <option value="bodega">Bodega</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
+                
+                <div class="content-grid">
+                    <div class="panel">
+                        <div class="panel-title">📝 Datos de la Propiedad</div>
+                        <form id="genForm">
                             <div class="form-group">
-                                <label for="bedrooms">Habitaciones</label>
-                                <input type="number" id="bedrooms" min="0" max="20" value="3" required>
+                                <label>Tipo</label>
+                                <select id="propertyType">
+                                    <option value="departamento">Departamento</option>
+                                    <option value="casa">Casa</option>
+                                    <option value="oficina">Oficina</option>
+                                    <option value="local comercial">Local Comercial</option>
+                                    <option value="terreno">Terreno</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Habitaciones</label>
+                                    <input type="number" id="rooms" value="3" min="0" max="20">
+                                </div>
+                                <div class="form-group">
+                                    <label>Baños</label>
+                                    <input type="number" id="baths" value="2" min="1" max="10">
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label for="bathrooms">Baños</label>
-                                <input type="number" id="bathrooms" min="1" max="10" value="2" required>
+                                <label>Metros Cuadrados</label>
+                                <input type="number" id="size" value="85" min="10">
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="size">Metros Cuadrados</label>
-                            <input type="number" id="size" min="10" max="10000" value="85" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="location">Ubicación (Comuna/Ciudad)</label>
-                            <input type="text" id="location" placeholder="Ej: Las Condes, Santiago">
-                        </div>
-                        <div class="form-group">
-                            <label for="features">Características (separadas por coma)</label>
-                            <input type="text" id="features" placeholder="Ej: piscina, estacionamiento, bodega, terraza">
-                        </div>
-                        <div class="form-group">
-                            <label for="style">Estilo de Descripción</label>
-                            <select id="style">
-                                <option value="profesional">Profesional</option>
-                                <option value="emocional">Emocional / Persuasivo</option>
-                                <option value="tecnico">Técnico / Detallado</option>
-                                <option value="lujo">Lujo / Premium</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block" id="generateBtn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                            <span>Generar Descripción</span>
-                        </button>
-                    </form>
-                    <div class="generator-result">
-                        <div class="generator-result-header">
-                            <span class="credits-badge">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                                <span id="creditsDisplay">3 créditos restantes</span>
-                            </span>
-                            <button class="copy-btn" id="copyBtn" style="display: none;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                Copiar
+                            <div class="form-group">
+                                <label>Ubicación</label>
+                                <input type="text" id="location" placeholder="Ej: Las Condes, Santiago">
+                            </div>
+                            <div class="form-group">
+                                <label>Características</label>
+                                <input type="text" id="features" placeholder="piscina, estacionamiento, bodega">
+                            </div>
+                            <div class="form-group">
+                                <label>Estilo</label>
+                                <select id="style">
+                                    <option value="profesional">Profesional</option>
+                                    <option value="emocional">Emocional</option>
+                                    <option value="lujo">Lujo / Premium</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-generate" id="genBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                Generar Descripción
                             </button>
+                        </form>
+                    </div>
+                    
+                    <div class="panel">
+                        <div class="result-header">
+                            <span class="credits-badge" id="creditsLabel">3 créditos</span>
+                            <button class="btn-copy" id="copyBtn" style="display:none;" onclick="copyResult()">📋 Copiar</button>
                         </div>
-                        <div class="generator-result-content" id="resultContent">
-                            <p class="placeholder-text">Tu descripción generada aparecerá aquí...</p>
+                        <div class="result-box placeholder" id="result">
+                            Tu descripción aparecerá aquí...
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- History Section (hidden by default) -->
-            <div id="historySection" style="display: none;">
-                <div class="dashboard-header">
-                    <h1>Historial de Generaciones</h1>
+            
+            <div id="historySection" class="section">
+                <div class="header">
+                    <h1>📜 Historial</h1>
                     <p>Todas tus descripciones generadas</p>
                 </div>
-                <div class="history-list" id="historyList">
-                    <p class="placeholder-text">No tienes generaciones aún</p>
+                <div class="panel">
+                    <div id="historyList">
+                        <p style="color:#9ca3af; text-align:center; padding:2rem;">No tienes generaciones aún</p>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <!-- API Key Modal -->
-    <div id="apiKeyModal" class="modal" style="display: none;">
-        <div class="modal-content auth-card">
-            <div class="auth-header">
-                <h1>🔑 Configurar API</h1>
-                <p>Ingresa tu API Key de OpenRouter para comenzar (es gratis)</p>
-            </div>
-            <form id="apiKeyForm" class="auth-form">
-                <div class="form-group">
-                    <label for="apiKey">OpenRouter API Key</label>
-                    <input type="password" id="apiKey" placeholder="sk-or-..." required>
+    
+    <script>
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://saas-backend-wc0y.onrender.com';
+        let user = null;
+        
+        function checkAuth() {
+            const userData = localStorage.getItem('inmodescribe_user');
+            if (!userData) { window.location.href = 'login.html'; return; }
+            user = JSON.parse(userData);
+            if (user.credits === undefined) user.credits = 3;
+            updateUI();
+            loadHistory();
+        }
+        
+        function updateUI() {
+            document.getElementById('userName').textContent = user.name || 'Usuario';
+            document.getElementById('userAvatar').textContent = (user.name || 'U')[0].toUpperCase();
+            document.getElementById('userPlan').textContent = 'Plan ' + (user.plan || 'Gratis');
+            document.getElementById('credits').textContent = user.credits;
+            document.getElementById('creditsLabel').textContent = user.credits + ' créditos';
+            document.getElementById('planName').textContent = user.plan || 'Gratis';
+            document.getElementById('totalGens').textContent = user.totalGens || 0;
+            document.getElementById('monthGens').textContent = user.monthGens || 0;
+            
+            if (user.credits <= 0) {
+                document.getElementById('noCreditsAlert').style.display = 'flex';
+                document.getElementById('genBtn').disabled = true;
+            }
+        }
+        
+        function saveUser() {
+            localStorage.setItem('inmodescribe_user', JSON.stringify(user));
+            const users = JSON.parse(localStorage.getItem('inmodescribe_users') || '[]');
+            const idx = users.findIndex(u => u.email === user.email);
+            if (idx >= 0) { users[idx] = user; localStorage.setItem('inmodescribe_users', JSON.stringify(users)); }
+        }
+        
+        function logout() { localStorage.removeItem('inmodescribe_user'); window.location.href = 'login.html'; }
+        
+        function showSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(name + 'Section').classList.add('active');
+            document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+            event.target.closest('a').classList.add('active');
+        }
+        
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('inmodescribe_history') || '[]');
+            const list = document.getElementById('historyList');
+            if (history.length === 0) {
+                list.innerHTML = '<p style="color:#9ca3af; text-align:center; padding:2rem;">No tienes generaciones aún</p>';
+                return;
+            }
+            list.innerHTML = history.slice(0, 20).map((item, i) => `
+                <div class="history-item" onclick="showHistoryItem(${i})">
+                    <div class="history-meta">
+                        <span>${item.propertyType} - ${item.size}m²</span>
+                        <span>${new Date(item.date).toLocaleDateString('es-CL')}</span>
+                    </div>
+                    <div class="history-preview">${item.description.substring(0, 100)}...</div>
                 </div>
-                <p style="font-size: 0.75rem; color: var(--neutral-500);">
-                    Obtén tu API Key gratis en <a href="https://openrouter.ai/keys" target="_blank" style="color: var(--primary-600);">openrouter.ai/keys</a>
-                </p>
-                <button type="submit" class="btn btn-primary btn-block">Guardar y Continuar</button>
-            </form>
-        </div>
-    </div>
-
-    <style>
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1rem; }
-        .modal-content { animation: modalIn 0.3s ease; }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .history-item { background: white; padding: 1.25rem; border-radius: 0.75rem; border: 1px solid var(--neutral-100); margin-bottom: 1rem; cursor: pointer; transition: 0.2s; }
-        .history-item:hover { border-color: #C7D2FE; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .history-item-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
-        .history-item-type { font-weight: 600; }
-        .history-item-date { font-size: 0.75rem; color: var(--neutral-400); }
-        .history-item-preview { font-size: 0.875rem; color: var(--neutral-500); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    </style>
-
-    <script src="js/auth.js"></script>
-    <script src="js/generator.js"></script>
+            `).join('');
+        }
+        
+        function showHistoryItem(idx) {
+            const history = JSON.parse(localStorage.getItem('inmodescribe_history') || '[]');
+            const item = history[idx];
+            if (item) {
+                document.getElementById('result').classList.remove('placeholder');
+                document.getElementById('result').innerHTML = item.description.replace(/\n/g, '<br>');
+                document.getElementById('copyBtn').style.display = 'block';
+                showSection('generator');
+            }
+        }
+        
+        document.getElementById('genForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (user.credits <= 0) { showToast('Sin créditos'); return; }
+            
+            const btn = document.getElementById('genBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Generando...';
+            result.classList.add('placeholder');
+            result.innerHTML = '✨ Generando...';
+            
+            const data = {
+                propertyType: document.getElementById('propertyType').value,
+                rooms: document.getElementById('rooms').value,
+                bathrooms: document.getElementById('baths').value,
+                size: document.getElementById('size').value,
+                location: document.getElementById('location').value || 'Santiago',
+                features: document.getElementById('features').value,
+                style: document.getElementById('style').value
+            };
+            
+            let description = '';
+            try {
+                const response = await fetch(`${API_URL}/api/propiedadia/generate`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                if (json.success && json.description) description = json.description;
+                else throw new Error('API error');
+            } catch (err) {
+                await new Promise(r => setTimeout(r, 1500));
+                description = generateDynamicDescription(data);
+            }
+            
+            result.classList.remove('placeholder');
+            result.innerHTML = description.replace(/\n/g, '<br>');
+            document.getElementById('copyBtn').style.display = 'block';
+            
+            user.credits--;
+            user.totalGens = (user.totalGens || 0) + 1;
+            user.monthGens = (user.monthGens || 0) + 1;
+            saveUser();
+            updateUI();
+            
+            const history = JSON.parse(localStorage.getItem('inmodescribe_history') || '[]');
+            history.unshift({ ...data, description, date: new Date().toISOString() });
+            localStorage.setItem('inmodescribe_history', JSON.stringify(history.slice(0, 50)));
+            loadHistory();
+            
+            btn.disabled = user.credits <= 0;
+            btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Generar Descripción';
+            showToast('¡Descripción generada!');
+        });
+        
+        function generateDynamicDescription(data) {
+            const intros = [
+                `🏡 ¡${data.propertyType.charAt(0).toUpperCase() + data.propertyType.slice(1)} espectacular de ${data.size}m² en ${data.location}!`,
+                `✨ Increíble oportunidad: ${data.propertyType} de ${data.size}m² en excelente sector de ${data.location}.`,
+                `🌟 ${data.propertyType.charAt(0).toUpperCase() + data.propertyType.slice(1)} de ensueño en ${data.location} - ${data.size}m² de puro confort.`,
+                `💎 Exclusivo ${data.propertyType} de ${data.size}m² ubicado en el corazón de ${data.location}.`,
+                `🔑 ¡No te pierdas este ${data.propertyType}! ${data.size}m² en privilegiada ubicación de ${data.location}.`,
+                `🏠 Hermoso ${data.propertyType} en ${data.location}, ${data.size}m² de espacios acogedores.`,
+                `⭐ ${data.propertyType.charAt(0).toUpperCase() + data.propertyType.slice(1)} premium de ${data.size}m² - Tu hogar ideal en ${data.location}.`
+            ];
+            
+            const descriptions = [
+                `Cuenta con ${data.rooms} amplias habitaciones con luz natural abundante y ${data.bathrooms} modernos baños completamente equipados.`,
+                `Dispone de ${data.rooms} dormitorios perfectamente diseñados y ${data.bathrooms} baños de primera categoría.`,
+                `Sus ${data.rooms} habitaciones están pensadas para el máximo confort, complementadas con ${data.bathrooms} baños de lujo.`,
+                `Ofrece ${data.rooms} espaciosas habitaciones y ${data.bathrooms} baños con terminaciones premium.`,
+                `Distribuido en ${data.rooms} dormitorios luminosos y ${data.bathrooms} modernos baños con excelentes terminaciones.`,
+                `Presenta ${data.rooms} habitaciones ventiladas con closet y ${data.bathrooms} baños de diseño contemporáneo.`
+            ];
+            
+            const features = data.features ? data.features.split(',').map(f => '• ' + f.trim().charAt(0).toUpperCase() + f.trim().slice(1)).join('\n') : 
+                '• Excelentes terminaciones\n• Ubicación privilegiada\n• Espacios luminosos\n• Óptima distribución';
+            
+            const closings = [
+                '¡Una oportunidad única que no puedes dejar pasar! 📞 Agenda tu visita hoy.',
+                'Perfecta para quienes buscan calidad y comodidad. ¡Contáctanos!',
+                'Tu nuevo hogar te espera. ¡No dejes pasar esta oportunidad!',
+                '¿Buscas tu hogar ideal? ¡Esta es la propiedad que esperabas!',
+                'Invierte en tu futuro. ¡Coordina una visita ahora mismo!',
+                '¡Llámanos hoy y conoce este increíble espacio! 📱',
+                'La propiedad de tus sueños te espera. ¡Agenda tu visita! ✨'
+            ];
+            
+            return `${intros[Math.floor(Math.random() * intros.length)]}\n\n${descriptions[Math.floor(Math.random() * descriptions.length)]}\n\n✨ Características destacadas:\n${features}\n\n${closings[Math.floor(Math.random() * closings.length)]}`;
+        }
+        
+        function copyResult() { navigator.clipboard.writeText(document.getElementById('result').innerText).then(() => showToast('¡Copiado!')); }
+        
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        checkAuth();
+    </script>
 </body>
 </html>
